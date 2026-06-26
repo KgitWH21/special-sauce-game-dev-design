@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Special Sauce — a deck of game-feel ingredients & constraints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#17121F; --ink-2:#1E1729; --surface:#251D34; --surface-2:#2E2440;
+    --line:#3A2F4F; --cream:#F3ECDD; --muted:#9B8FB0;
+    --gold:#F5B841; --coral:#FF5D5D; --mint:#5EEAD4;
+    --c-juice:#FF5D5D; --c-sound:#5EEAD4; --c-visual:#F5B841; --c-secret:#B07CF0;
+    --c-respect:#6FB7FF; --c-prog:#A8E05F; --c-person:#FF8FB8; --c-system:#FF9A4D;
+    --c-ui:#54D6E8; --c-onboard:#E0C088;
+    --k-subtract:#F5B841; --k-subvert:#B07CF0; --k-embody:#5EEAD4; --k-collide:#FF9A4D;
+    --k-cost:#FF5D5D; --k-echo:#6FB7FF; --k-voice:#FF8FB8; --k-lens:#E0C088;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #2a1f3d 0%, transparent 60%), var(--ink);
+    color:var(--cream); font-family:"Space Grotesk",system-ui,sans-serif; min-height:100vh;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  body::after{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:9999;
+    background:repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.08) 2px 3px);
+    mix-blend-mode:multiply; opacity:.5;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:22px clamp(16px,4vw,40px) 80px}
+
+  /* marquee */
+  .marquee{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-bottom:18px; border-bottom:1px solid var(--line); margin-bottom:22px}
+  .brand{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+  .brand h1{font-size:clamp(28px,5.5vw,46px); font-weight:700; margin:0; letter-spacing:-.02em;
+    background:linear-gradient(180deg,#FFE6A8,var(--gold) 55%,#D98A2B);
+    -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 2px 0 rgba(0,0,0,.25)}
+  .arcade{font-family:"Press Start 2P",monospace; font-size:8px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; line-height:1.8}
+  .counter{font-family:"Space Mono",monospace; color:var(--muted); font-size:13px; text-align:right}
+  .counter b{color:var(--gold)}
+
+  /* mode switch */
+  .modeswitch{display:flex; gap:6px; background:var(--ink-2); border:1px solid var(--line); border-radius:14px; padding:6px; margin:4px auto 24px; width:fit-content; max-width:100%; flex-wrap:wrap; justify-content:center}
+  .modeswitch button{font-family:inherit; font-size:14px; font-weight:600; color:var(--muted); background:transparent; border:none; padding:10px 18px; border-radius:9px; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:8px}
+  .modeswitch button:hover{color:var(--cream)}
+  .modeswitch button.active{background:var(--surface-2); color:var(--cream); box-shadow:inset 0 0 0 1px var(--line)}
+  .modeswitch button.active.combo{color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold)}
+  .modeswitch .sub{font-family:"Press Start 2P",monospace; font-size:7px; opacity:.7}
+
+  /* stage */
+  .stage-region{display:flex; flex-direction:column; align-items:center; gap:22px; margin:0 0 30px}
+  .stage{position:relative; min-height:470px; width:100%; display:flex; align-items:center; justify-content:center}
+  .stage.shake{animation:shake .32s ease}
+  @keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-6px,3px) rotate(-1deg)}40%{transform:translate(5px,-4px) rotate(1deg)}60%{transform:translate(-4px,-2px)}80%{transform:translate(3px,3px)}}
+  .placeholder{width:min(340px,86vw); aspect-ratio:3/4.1; border:2px dashed var(--line); border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:var(--muted); text-align:center; padding:24px}
+  .placeholder .big{font-family:"Press Start 2P",monospace; font-size:13px; color:var(--gold); line-height:1.9}
+  .placeholder .sub{font-size:13px; max-width:230px}
+
+  /* card */
+  .card{position:relative; border-radius:18px; overflow:hidden; background:linear-gradient(180deg,var(--surface),var(--ink-2)); border:1px solid var(--line); box-shadow:0 18px 40px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04); display:flex; flex-direction:column}
+  .card.solo{width:min(340px,86vw); aspect-ratio:3/4.1}
+  .card.dealt{animation:deal .55s cubic-bezier(.18,.9,.28,1.3)}
+  @keyframes deal{0%{transform:scale(.4) rotate(-8deg); opacity:0}60%{opacity:1}100%{transform:scale(1) rotate(0); opacity:1}}
+  .card .accent{height:6px; width:100%}
+  .card .body{padding:20px 20px 16px; display:flex; flex-direction:column; gap:12px; flex:1}
+  .card .top{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .eyebrow{font-family:"Press Start 2P",monospace; font-size:8px; letter-spacing:.06em; text-transform:uppercase}
+  .rdot{width:11px; height:11px; border-radius:50%; box-shadow:0 0 10px currentColor}
+  .card h3{margin:0; font-size:clamp(19px,2.4vw,24px); font-weight:700; letter-spacing:-.01em; line-height:1.15}
+  .card .blurb{color:#D9D0E6; font-size:15px; margin:0}
+  .card .ex{margin-top:auto; font-size:12.5px; color:var(--muted); border-top:1px dashed var(--line); padding-top:12px}
+  .card .ex b{color:var(--cream); font-weight:600}
+  .stats{display:flex; gap:18px; padding:14px 20px; background:rgba(0,0,0,.22); border-top:1px solid var(--line)}
+  .stat{flex:1}
+  .stat .lab{font-family:"Space Mono",monospace; font-size:10px; letter-spacing:.1em; color:var(--muted); text-transform:uppercase}
+  .pips{display:flex; gap:5px; margin-top:6px}
+  .pip{width:100%; height:7px; border-radius:3px; background:var(--line)}
+  .stat.impact .pip.on{background:var(--coral)}
+  .stat.effort .pip.on{background:var(--mint)}
+  .ribbon{position:absolute; top:14px; right:-34px; transform:rotate(45deg); background:linear-gradient(180deg,#FFE6A8,var(--gold)); color:#3a2400; font-family:"Press Start 2P",monospace; font-size:7px; letter-spacing:.05em; padding:6px 38px; box-shadow:0 4px 10px rgba(0,0,0,.4); z-index:3}
+
+  /* constraint card variant */
+  .card.ck{background:linear-gradient(180deg,#221C30,#191322)}
+  .card.ck .body{background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px); background-size:22px 22px}
+  .lens-tag{font-family:"Space Mono",monospace; font-size:9px; letter-spacing:.12em; color:var(--muted); border:1px solid var(--line); border-radius:5px; padding:2px 7px}
+  .spark{margin-top:auto; border-top:1px dashed var(--line); padding-top:12px; font-size:13.5px; color:#D9D0E6}
+  .spark .spark-l{display:block; font-family:"Space Mono",monospace; font-size:9px; letter-spacing:.12em; color:var(--ac,var(--gold)); margin-bottom:5px}
+
+  /* draw controls */
+  .controls-draw{display:flex; flex-direction:column; align-items:center; gap:10px}
+  .btn-row{display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
+  button{font-family:inherit; cursor:pointer; border:none}
+  .draw{font-family:"Press Start 2P",monospace; font-size:14px; letter-spacing:.04em; background:linear-gradient(180deg,#FFE6A8,var(--gold) 60%,#D98A2B); color:#3a2400; padding:18px 32px; border-radius:14px; box-shadow:0 6px 0 #9c5e16, 0 14px 26px -10px rgba(245,184,65,.6); transition:transform .08s ease, box-shadow .08s ease}
+  .draw:hover{transform:translateY(-1px)}
+  .draw:active{transform:translateY(5px); box-shadow:0 1px 0 #9c5e16}
+  .draw-2{font-size:13px; font-weight:600; background:var(--surface-2); color:var(--cream); padding:14px 18px; border-radius:12px; border:1px solid var(--line); transition:border-color .15s ease, background .15s ease}
+  .draw-2:hover{border-color:var(--gold); background:var(--surface)}
+  .hint{font-size:12.5px; color:var(--muted)}
+  .hint kbd{font-family:"Space Mono",monospace; background:var(--surface); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 7px; font-size:11px; color:var(--cream)}
+
+  .hand{display:none; gap:16px; flex-wrap:wrap; justify-content:center; width:100%}
+  .hand.show{display:flex}
+  .hand .card{width:min(280px,84vw); aspect-ratio:3/4.1}
+  .hand .card.dealt{animation:deal .5s cubic-bezier(.18,.9,.28,1.3) backwards}
+
+  /* combo widget */
+  .combo{width:min(840px,94vw); background:linear-gradient(180deg,var(--surface),var(--ink-2)); border:1px solid var(--line); border-radius:18px; overflow:hidden; box-shadow:0 18px 44px -18px rgba(0,0,0,.85)}
+  .combo.dealt{animation:deal .55s cubic-bezier(.18,.9,.28,1.3)}
+  .combo-band{font-family:"Press Start 2P",monospace; font-size:9px; letter-spacing:.14em; text-align:center; padding:11px; background:rgba(245,184,65,.12); color:var(--gold); border-bottom:1px solid var(--line)}
+  .combo-pair{display:flex; align-items:stretch}
+  .mini{flex:1; padding:18px 20px; position:relative}
+  .mini.feature{border-left:4px solid var(--mf,var(--gold))}
+  .mini.constraint{border-left:4px solid var(--mc,var(--mint))}
+  .mini .role{font-family:"Press Start 2P",monospace; font-size:7px; letter-spacing:.1em; color:var(--muted); display:block; margin-bottom:8px}
+  .mini .eyebrow{display:block; margin-bottom:4px}
+  .mini h4{margin:0; font-size:19px; font-weight:700; line-height:1.15}
+  .vs{display:flex; align-items:center; justify-content:center; padding:0 4px; font-family:"Space Mono",monospace; font-size:12px; color:var(--muted)}
+  .vs span{background:var(--ink); border:1px solid var(--line); border-radius:999px; padding:6px 11px}
+  .combo-brief{padding:20px 24px 24px; border-top:1px solid var(--line)}
+  .combo-brief h4{margin:0 0 10px; font-size:clamp(18px,2.4vw,22px); font-weight:700; line-height:1.2}
+  .combo-brief p{margin:0 0 9px; color:#D9D0E6; font-size:15px}
+  .combo-brief .bend b{color:var(--gold)}
+  .combo-brief .spark{margin-top:4px; border-top:1px dashed var(--line); padding-top:12px}
+
+  /* filters */
+  .filters{display:flex; flex-direction:column; gap:14px; margin:8px 0 24px; padding:18px; background:var(--ink-2); border:1px solid var(--line); border-radius:16px}
+  .filters.hidden{display:none}
+  .filt-top{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+  .search{flex:1; min-width:200px; background:var(--ink); border:1px solid var(--line); color:var(--cream); border-radius:10px; padding:11px 14px; font-family:inherit; font-size:14px}
+  .search::placeholder{color:var(--muted)}
+  .search:focus{outline:none; border-color:var(--gold)}
+  .gold-toggle{display:flex; align-items:center; gap:9px; font-size:13px; color:var(--cream); background:var(--ink); border:1px solid var(--line); padding:9px 14px; border-radius:10px; cursor:pointer; user-select:none; white-space:nowrap; transition:border-color .15s}
+  .gold-toggle.hidden{display:none}
+  .gold-toggle:hover{border-color:var(--gold)}
+  .gold-toggle .sw{width:34px; height:18px; border-radius:10px; background:var(--line); position:relative; transition:background .18s}
+  .gold-toggle .sw::after{content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:var(--cream); transition:left .18s}
+  .gold-toggle.on .sw{background:var(--gold)}
+  .gold-toggle.on .sw::after{left:18px}
+  .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{font-size:12.5px; font-weight:500; padding:7px 13px; border-radius:999px; cursor:pointer; background:var(--ink); border:1px solid var(--line); color:var(--muted); transition:all .14s ease; display:flex; align-items:center; gap:7px}
+  .chip .d{width:8px; height:8px; border-radius:50%}
+  .chip:hover{color:var(--cream); border-color:var(--muted)}
+  .chip.active{color:var(--ink); font-weight:600}
+
+  /* combo explainer panel */
+  .combo-help{display:none; margin:8px 0 24px; padding:20px 22px; background:var(--ink-2); border:1px solid var(--line); border-radius:16px; color:#D9D0E6; font-size:14.5px; line-height:1.7}
+  .combo-help.show{display:block}
+  .combo-help b{color:var(--gold)}
+
+  /* browse grid */
+  .grid-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:6px 2px 16px; flex-wrap:wrap}
+  .grid-head.hidden{display:none}
+  .grid-head h2{font-size:20px; margin:0; font-weight:700}
+  .grid-head .n{font-family:"Space Mono",monospace; font-size:13px; color:var(--muted)}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px}
+  .grid.hidden{display:none}
+  .grid .card{min-height:240px; cursor:pointer; transition:transform .14s ease, border-color .14s ease}
+  .grid .card.ck{min-height:230px}
+  .grid .card:hover{transform:translateY(-4px); border-color:var(--gold)}
+  .empty-grid{grid-column:1/-1; text-align:center; color:var(--muted); padding:50px 20px; font-size:15px}
+
+  footer{margin-top:50px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:12.5px; text-align:center; line-height:1.9}
+  footer .arcade{font-size:7px}
+
+  .spark-p{position:fixed; width:9px; height:9px; border-radius:2px; pointer-events:none; z-index:9000; will-change:transform,opacity}
+
+  @media (max-width:640px){
+    .combo-pair{flex-direction:column}
+    .mini.feature, .mini.constraint{border-left:none; border-top:4px solid}
+    .mini.feature{border-top-color:var(--mf,var(--gold))}
+    .mini.constraint{border-top-color:var(--mc,var(--mint))}
+    .vs{padding:4px 0}
+  }
+  @media (max-width:600px){
+    .stats{padding:12px 16px; gap:12px}
+    .card .body{padding:16px}
+    .draw{font-size:12px; padding:16px 24px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="marquee">
+    <div class="brand">
+      <h1>Special Sauce</h1>
+      <span class="arcade">draw a touch · then twist it</span>
+    </div>
+    <div class="counter"><b id="fCount">0</b> ingredients · <b id="cCount">0</b> constraints<br><span id="gCount">0</span> goldmines inside</div>
+  </header>
+
+  <!-- MODE SWITCH -->
+  <div class="modeswitch" id="modeswitch">
+    <button data-mode="feature" class="active">◆ Ingredients</button>
+    <button data-mode="constraint">▦ Constraints</button>
+    <button data-mode="combo" class="combo">✦ Combo <span class="sub">the good stuff</span></button>
+  </div>
+
+  <!-- STAGE -->
+  <div class="stage-region">
+    <div class="stage" id="stage">
+      <div class="placeholder" id="placeholder">
+        <div class="big" id="phBig">PRESS&nbsp;DRAW</div>
+        <div class="sub" id="phSub">Pull a random touch to sprinkle into whatever you're building.</div>
+      </div>
+    </div>
+    <div class="hand" id="hand"></div>
+
+    <div class="controls-draw">
+      <div class="btn-row">
+        <button class="draw" id="drawBtn">◆ DRAW</button>
+        <button class="draw-2" id="secondBtn">Deal a hand of 3 →</button>
+      </div>
+      <div class="hint" id="hint">or hit <kbd>Space</kbd> to draw · filters below shape the pool</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters" id="filters">
+    <div class="filt-top">
+      <input class="search" id="search" type="text" placeholder="Search ingredients…" autocomplete="off">
+      <div class="gold-toggle" id="goldToggle"><span class="sw"></span> Goldmines only ★</div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <!-- COMBO HELP -->
+  <div class="combo-help" id="comboHelp">
+    <b>Combo mode</b> deals you a random ingredient and a random constraint as one design prompt. The ingredient is <i>what</i> to add; the constraint is <i>how to make it yours</i> — the rule that keeps it from feeling bolted-on. Hit <b>↻ New twist</b> to keep the ingredient and reroll just the constraint until something clicks. Want to read the constraints on their own? Flip to <b>▦ Constraints</b> above.
+  </div>
+
+  <!-- BROWSE -->
+  <div class="grid-head" id="gridHead">
+    <h2 id="pantryTitle">The whole pantry</h2>
+    <span class="n" id="showing"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <div class="arcade">built to be raided, not finished</div>
+    <div style="margin-top:8px">Ingredient = what to add · Constraint = how to make it unforgettable · ★ Goldmine = big payoff, small cost.<br>It's one file — send it to a friend, or pry it open and steal the data. There's also a secret card. The deck's about easter eggs; of course there is.</div>
+  </footer>
+</div>
+
+<script>
+// ===================== INGREDIENTS =====================
+const FCATS = {
+  juice:{label:"Juice",color:"var(--c-juice)"}, sound:{label:"Sound",color:"var(--c-sound)"},
+  visual:{label:"Visual",color:"var(--c-visual)"}, secret:{label:"Secrets",color:"var(--c-secret)"},
+  respect:{label:"Player Respect",color:"var(--c-respect)"}, prog:{label:"Progression",color:"var(--c-prog)"},
+  person:{label:"Personality",color:"var(--c-person)"}, system:{label:"Systemic Toys",color:"var(--c-system)"},
+  ui:{label:"UI Delight",color:"var(--c-ui)"}, onboard:{label:"Onboarding",color:"var(--c-onboard)"},
+};
+const FEATURES = [
+  {c:"juice",n:"Hitstop",b:"Freeze everything for a few frames on impact so blows land with real weight.",ex:"Smash Bros.",ef:1,im:3},
+  {c:"juice",n:"Screen shake",b:"Punch the camera on hits and explosions — short, sharp, and decaying fast.",ex:"Nuclear Throne",ef:1,im:3},
+  {c:"juice",n:"Coyote time",b:"Let players jump for a few frames after they've already left the ledge.",ex:"Celeste",ef:1,im:3},
+  {c:"juice",n:"Jump buffering",b:"Remember a jump pressed just before landing and fire it the instant they touch ground.",ex:"Celeste",ef:1,im:2},
+  {c:"juice",n:"Squash & stretch",b:"Deform the sprite on jump, land, and hit so motion feels alive and elastic.",ex:"Rayman",ef:1,im:3},
+  {c:"juice",n:"Camera lookahead",b:"Pan slightly toward where the player is heading so they can see what's coming.",ex:"Super Mario World",ef:2,im:2},
+  {c:"juice",n:"Anticipation frames",b:"A tiny wind-up before big actions so attacks read and feel deliberate.",ex:"Hollow Knight",ef:1,im:2},
+  {c:"juice",n:"Knockback & recoil",b:"Shove both the attacker and the target apart on a heavy hit.",ex:"Dead Cells",ef:1,im:2},
+  {c:"juice",n:"Time-slow on the kill",b:"A brief, dramatic slow-mo on the final blow or the big moment.",ex:"Hotline Miami",ef:2,im:3},
+  {c:"juice",n:"Ease everything",b:"No linear motion — ever. Ease every move, menu slide, and bar fill on a curve.",ex:"any polished game",ef:1,im:3},
+  {c:"juice",n:"Chromatic aberration pulse",b:"Split the color channels for a single frame on a big impact.",ex:"Downwell",ef:1,im:2},
+  {c:"juice",n:"Afterimage trail",b:"Smear fast-moving objects with a fading ghost trail.",ex:"Sonic",ef:1,im:2},
+  {c:"juice",n:"Impact flash-frame",b:"A single stark white frame on a heavy hit, like an anime fighter.",ex:"Guilty Gear",ef:1,im:3},
+  {c:"juice",n:"Landing dust",b:"Kick up a little puff of dust whenever the player lands.",ex:"Ori",ef:1,im:2},
+  {c:"juice",n:"Rumble grammar",b:"Distinct controller rumble patterns per event — not one generic buzz for everything.",ex:"Astro's Playroom",ef:2,im:2},
+  {c:"sound",n:"Pitch variation",b:"Randomize pitch a few percent on repeated SFX so they never sound copy-pasted.",ex:"every good game",ef:1,im:3},
+  {c:"sound",n:"Rising combo pitch",b:"Step the pitch up with each chained pickup so a streak literally sounds like progress.",ex:"A Short Hike",ef:1,im:3},
+  {c:"sound",n:"Adaptive music layers",b:"Add instruments and intensity to the track as the action heats up.",ex:"DOOM (2016)",ef:3,im:3},
+  {c:"sound",n:"Drop the music",b:"Cut to near-silence right before a boss, a reveal, or a death.",ex:"Inside",ef:1,im:3},
+  {c:"sound",n:"Surface-aware footsteps",b:"Different step sounds for grass, stone, wood, water, snow.",ex:"The Last of Us",ef:2,im:2},
+  {c:"sound",n:"Voice blips",b:"Give characters gibberish syllable-speak instead of full voice acting.",ex:"Animal Crossing",ef:1,im:3},
+  {c:"sound",n:"UI sounds with character",b:"Menus, toggles, and the cursor each get their own satisfying click.",ex:"Persona 5",ef:1,im:3},
+  {c:"sound",n:"Music ducking",b:"Dip the soundtrack automatically when key SFX or dialogue need the spotlight.",ex:"most shooters",ef:2,im:2},
+  {c:"sound",n:"Diegetic tension",b:"Let an in-world sound — a hum, a ticking, a heartbeat — carry the dread.",ex:"Amnesia",ef:2,im:2},
+  {c:"sound",n:"Discovery stinger",b:"A short musical sting the moment something is found or solved.",ex:"Zelda secret jingle",ef:1,im:2},
+  {c:"visual",n:"Idle animations",b:"After standing still a while, the character fidgets, stretches, taps a foot, or dozes off.",ex:"Sonic",ef:1,im:3},
+  {c:"visual",n:"Look-at tracking",b:"The character's head or eyes follow the cursor, nearest enemy, or item of interest.",ex:"Hades",ef:2,im:2},
+  {c:"visual",n:"Breathing idle",b:"A subtle bob or sway so nothing on screen ever sits perfectly, deadly still.",ex:"Hollow Knight",ef:1,im:2},
+  {c:"visual",n:"Persistent footprints",b:"Leave lasting marks in snow, sand, mud, or blood as the player moves.",ex:"Red Dead 2",ef:2,im:2},
+  {c:"visual",n:"Damage flash",b:"Flash a sprite solid white for a frame when it takes a hit.",ex:"Vampire Survivors",ef:1,im:3},
+  {c:"visual",n:"Interactable outline",b:"Glow or outline the things a player can actually pick up or use.",ex:"The Witness",ef:1,im:3},
+  {c:"visual",n:"Parallax depth",b:"Scroll background layers at different speeds to fake real depth.",ex:"Ori",ef:1,im:2},
+  {c:"visual",n:"Reactive lighting",b:"Muzzle flashes, spells, and fires actually cast light on the scene.",ex:"Noita",ef:3,im:2},
+  {c:"visual",n:"Reactive foliage",b:"Grass and bushes bend and rustle as the player brushes past.",ex:"Breath of the Wild",ef:2,im:2},
+  {c:"visual",n:"Committed palette",b:"Lock to a tight, limited color palette and let it become your identity.",ex:"Downwell",ef:2,im:3},
+  {c:"visual",n:"Death with flair",b:"Make dying a tiny spectacle — a pop, a ragdoll, a fade — not just a freeze.",ex:"Super Meat Boy",ef:1,im:2},
+  {c:"visual",n:"Weather as mood",b:"Use rain, fog, and shifting light to set emotional tone, not just realism.",ex:"Kentucky Route Zero",ef:2,im:2},
+  {c:"visual",n:"Grain & vignette as style",b:"Scanlines, film grain, or a vignette used on purpose as part of the look.",ex:"Hotline Miami",ef:1,im:2},
+  {c:"secret",n:"Konami code",b:"Reward the classic up-up-down-down-left-right-left-right-B-A input.",ex:"Contra",ef:1,im:2},
+  {c:"secret",n:"Title-screen patience",b:"Hide a message or scene that only appears if you sit on the menu doing nothing.",ex:"NieR",ef:1,im:3},
+  {c:"secret",n:"Developer room",b:"A hidden room with team photos, in-jokes, and cut content.",ex:"Sonic 2",ef:3,im:2},
+  {c:"secret",n:"Fake wall",b:"A wall that looks solid but isn't — bomb it, walk through it, fall behind it.",ex:"Zelda",ef:1,im:2},
+  {c:"secret",n:"Reward the boundary-breaker",b:"Put a secret exactly where players try to escape the level.",ex:"Portal",ef:2,im:3},
+  {c:"secret",n:"NPC notices weirdness",b:"Do something odd over and over and an NPC finally comments on it.",ex:"Undertale",ef:2,im:3},
+  {c:"secret",n:"Cheats with personality",b:"Codes that are funny or strange, not just powerful.",ex:"GoldenEye",ef:1,im:2},
+  {c:"secret",n:"Hidden character",b:"A secret playable hidden off the beaten path for the curious.",ex:"Smash Bros.",ef:3,im:3},
+  {c:"secret",n:"Self-aware death messages",b:"Funny, varied game-over text instead of one flat 'You Died'.",ex:"Spelunky",ef:1,im:3},
+  {c:"secret",n:"Playable credits",b:"Turn the credits roll into a little mini-game.",ex:"Portal",ef:2,im:2},
+  {c:"respect",n:"Generous player hitbox",b:"Make the player's hurtbox smaller than it looks; enemy hitboxes the opposite.",ex:"Touhou",ef:1,im:3},
+  {c:"respect",n:"Last-hit mercy",b:"Survive a lethal blow at 1 HP if you were at full health when it landed.",ex:"Zelda",ef:1,im:3},
+  {c:"respect",n:"Skippable everything",b:"Let players skip cutscenes — and re-skip instantly on a retry.",ex:"Hades",ef:1,im:3},
+  {c:"respect",n:"One-button fast restart",b:"Instant retry on death with a single key. No menus, no waiting.",ex:"Super Meat Boy",ef:1,im:3},
+  {c:"respect",n:"Remappable controls",b:"Let players rebind every key and button to whatever they want.",ex:"Celeste",ef:2,im:3},
+  {c:"respect",n:"Confirm only what's costly",b:"Ask 'are you sure?' for destructive actions — and nothing else.",ex:"good menus",ef:1,im:2},
+  {c:"respect",n:"Quiet rubber-banding",b:"Nudge difficulty toward the player invisibly so they rarely feel cheated.",ex:"Resident Evil 4",ef:3,im:2},
+  {c:"respect",n:"Forgiving checkpoints",b:"Restart just before the hard part, not minutes before it.",ex:"Celeste",ef:1,im:3},
+  {c:"respect",n:"Subtle aim snap",b:"Quietly help shots land where the player clearly intended.",ex:"Halo",ef:2,im:2},
+  {c:"respect",n:"Readability options",b:"Colorblind modes, scalable text, and shape-coded info, not color alone.",ex:"The Last of Us 2",ef:2,im:3},
+  {c:"prog",n:"Number go up",b:"Make XP, gold, and score climb with a juicy ticking animation, never a snap.",ex:"Vampire Survivors",ef:1,im:3},
+  {c:"prog",n:"Loot rarity colors",b:"Color-code drops by rarity so value reads at a single glance.",ex:"Diablo",ef:1,im:3},
+  {c:"prog",n:"Pickup magnetism",b:"Let nearby coins and loot fly toward the player on their own.",ex:"Diablo",ef:1,im:3},
+  {c:"prog",n:"Streaks & dailies",b:"Reward showing up with a visible streak counter that hurts to break.",ex:"Wordle",ef:2,im:2},
+  {c:"prog",n:"Optional collectibles",b:"Hide non-mandatory trinkets for the completionists to hunt.",ex:"Jak & Daxter",ef:2,im:2},
+  {c:"prog",n:"Achievements with jokes",b:"Name achievements for personality, not just 'Complete Level 3'.",ex:"Team Fortress 2",ef:1,im:2},
+  {c:"prog",n:"Cosmetic unlocks",b:"Hats, skins, palettes, and trails earned purely for the joy of it.",ex:"Rocket League",ef:2,im:2},
+  {c:"prog",n:"New Game Plus",b:"Replay the whole thing harder with everything you earned intact.",ex:"Hades",ef:3,im:2},
+  {c:"prog",n:"Milestone fanfare",b:"A real celebration moment when a big threshold is crossed.",ex:"Stardew Valley",ef:1,im:3},
+  {c:"person",n:"Flavor text",b:"Item and tooltip descriptions packed with jokes, lore, and voice.",ex:"Slay the Spire",ef:1,im:3},
+  {c:"person",n:"The game remembers",b:"Reference how you've played — your deaths, your choices, your hours logged.",ex:"Hades",ef:3,im:3},
+  {c:"person",n:"In-character loading tips",b:"Loading-screen tips that are funny or written in the world's voice.",ex:"Left 4 Dead",ef:1,im:2},
+  {c:"person",n:"A companion",b:"A pet or sidekick that reacts, comments, and tags along.",ex:"Hollow Knight (Hornet)",ef:3,im:3},
+  {c:"person",n:"Named NPCs with wants",b:"Even bit characters get a name and one small thing they want.",ex:"Stardew Valley",ef:2,im:2},
+  {c:"person",n:"Environmental storytelling",b:"Tell the story through props, posing, and scenes — not text dumps.",ex:"Dark Souls",ef:3,im:3},
+  {c:"person",n:"Fourth-wall winks",b:"Occasional, perfectly-timed nods that you, the player, exist.",ex:"Undertale",ef:2,im:2},
+  {c:"person",n:"Context-aware pause",b:"The pause menu changes based on where you are or what's happening.",ex:"Metal Gear Solid",ef:2,im:2},
+  {c:"person",n:"Found notes & letters",b:"Build the world through documents the player chooses to read.",ex:"BioShock",ef:2,im:2},
+  {c:"system",n:"A useless-but-fun button",b:"A honk, a wave, a whistle that does nothing mechanical and everything emotional.",ex:"Untitled Goose Game",ef:1,im:3},
+  {c:"system",n:"Emergent combinations",b:"Let systems interact in ways you never explicitly scripted.",ex:"Breath of the Wild",ef:3,im:3},
+  {c:"system",n:"Destructible props",b:"Let players smash, push, topple, and rearrange the scenery.",ex:"Red Faction",ef:2,im:2},
+  {c:"system",n:"Physics playground",b:"Objects with weight and bounce that are just fun to bat around.",ex:"Half-Life 2",ef:2,im:3},
+  {c:"system",n:"Pet the dog",b:"Always — always — let the player pet the animal.",ex:"Stray",ef:1,im:3},
+  {c:"system",n:"Reward curiosity",b:"Hide tiny reactions for players who poke at things they shouldn't.",ex:"The Stanley Parable",ef:2,im:2},
+  {c:"ui",n:"Animated transitions",b:"Wipe, iris, or slide between screens instead of a hard cut.",ex:"Celeste",ef:1,im:2},
+  {c:"ui",n:"Cursor with character",b:"A custom, reactive cursor or pointing hand that feels part of the world.",ex:"Cuphead",ef:1,im:2},
+  {c:"ui",n:"Satisfying toggles",b:"Make checkboxes and sliders animate and click like a real switch.",ex:"good settings menus",ef:1,im:3},
+  {c:"ui",n:"Diegetic UI",b:"Put the menu and HUD inside the world itself, no overlay.",ex:"Dead Space",ef:3,im:3},
+  {c:"ui",n:"Tooltips that teach",b:"Explain on hover in plain words, exactly when the player needs it.",ex:"Into the Breach",ef:1,im:2},
+  {c:"ui",n:"Confetti on completion",b:"Throw a little celebration when a level or task is finished.",ex:"mobile puzzlers",ef:1,im:3},
+  {c:"ui",n:"A living title screen",b:"Make the menu move, breathe, and play music — never a static logo.",ex:"Ori",ef:1,im:2},
+  {c:"onboard",n:"Teach through play",b:"No wall of text — design the first level so it IS the tutorial.",ex:"Mega Man, Mario 1-1",ef:3,im:3},
+  {c:"onboard",n:"Fast first 'yes!'",b:"Hand the player a real, satisfying win inside the opening minute.",ex:"Portal",ef:2,im:3},
+  {c:"onboard",n:"Show, don't tell controls",b:"Use diegetic prompts and demos instead of text boxes listing keys.",ex:"Inside",ef:2,im:2},
+  {c:"onboard",n:"Safe sandbox start",b:"A no-stakes space to mess with the controls before anything can hurt you.",ex:"Half-Life 2",ef:2,im:2},
+];
+FEATURES.forEach(d => d.gold = (d.im >= 3 && d.ef <= 1));
+
+// ===================== CONSTRAINTS =====================
+const CCATS = {
+  subtract:{label:"Subtract",color:"var(--k-subtract)"}, subvert:{label:"Subvert",color:"var(--k-subvert)"},
+  embody:{label:"Embody",color:"var(--k-embody)"}, collide:{label:"Collide",color:"var(--k-collide)"},
+  cost:{label:"Cost",color:"var(--k-cost)"}, echo:{label:"Echo",color:"var(--k-echo)"},
+  voice:{label:"Voice",color:"var(--k-voice)"}, lens:{label:"Lens",color:"var(--k-lens)"},
+};
+const CONSTRAINTS = [
+  {c:"subtract",n:"Once, and never again",b:"The feature can be used exactly once per playthrough — then it's gone for good.",spark:"A single 'undo' for any one decision in the whole game. Players will agonize over when to spend it."},
+  {c:"subtract",n:"Remove the obvious version",b:"Cut the most expected form of the feature and build only what's left.",spark:"A stealth game with no crouch button — you hide by what you wear, not what you press."},
+  {c:"subtract",n:"Only one of something",b:"Restrict it to a single resource, color, button, screen, or slot.",spark:"The entire UI lives on one note the player carries and re-reads."},
+  {c:"subtract",n:"It runs out",b:"Give the feature a finite, depleting budget that the player has to ration.",spark:"Screen-shake you can literally use up — so the big moments feel genuinely spent."},
+  {c:"subtract",n:"Strip the safety net",b:"Take away the forgiving version and let the raw feature bite.",spark:"No checkpoints in the final stretch. The mercy you had earlier is gone, and the player feels it."},
+  {c:"subtract",n:"Shrink the window",b:"Limit the player's view, map, or play space and let them earn more.",spark:"The map only ever lights up where you've actually walked."},
+  {c:"subvert",n:"Make it a lie",b:"The feature looks like it does one thing but quietly does another.",spark:"A health bar that's secretly counting down to something else entirely."},
+  {c:"subvert",n:"Invert who it helps",b:"The 'helpful' feature aids the enemy too — or instead of you.",spark:"Pickup magnetism that also drags hazards toward you."},
+  {c:"subvert",n:"Betray the tutorial",b:"Teach the player a rule, let them trust it, then break it on purpose later.",spark:"The safe green door is safe — until the one time it isn't."},
+  {c:"subvert",n:"Reward ignoring it",b:"Save the deepest payoff for the player who refuses to use the feature.",spark:"A pacifist run the game quietly, profoundly respects."},
+  {c:"subvert",n:"Turn comfort into dread",b:"Take a cozy, friendly feature and slowly make it unsettling.",spark:"The cheerful save-point jingle that, much later, starts to sound wrong."},
+  {c:"subvert",n:"Give it a will of its own",b:"Once in a while, the feature does what it wants — not what you asked.",spark:"A companion that occasionally, pointedly, ignores your order."},
+  {c:"embody",n:"Put it in the world",b:"Express the feature as a real object or event inside the fiction, not an overlay.",spark:"Ammo count shown on the gun itself; no HUD number anywhere."},
+  {c:"embody",n:"Tie it to your one big theme",b:"Bend the feature so it echoes what the game is actually about.",spark:"In a game about grief, every checkpoint is a memory you have to revisit."},
+  {c:"embody",n:"Decide who built it",b:"Pick the in-world character or institution that 'made' this system, and let it show.",spark:"A menu clearly designed by the bureaucracy running your dystopia — stamps and all."},
+  {c:"embody",n:"Give it a material",b:"Choose a real texture or medium for the feature and fully commit.",spark:"Damage shown as hairline cracks spreading across porcelain skin."},
+  {c:"embody",n:"Make the world keep it",b:"The feature leaves a permanent mark on the space it happened in.",spark:"Every death plants a tombstone you'll walk past on the next run."},
+  {c:"embody",n:"Speak the world's language",b:"Rename the feature in the setting's own vocabulary.",spark:"No 'XP' — you earn 'notoriety,' and the whole city reacts to how much you have."},
+  {c:"collide",n:"Borrow from the wrong genre",b:"Apply the feature the way a completely different genre would.",spark:"A farming sim's patience grafted onto a shooter's reload."},
+  {c:"collide",n:"Pair it with the wrong emotion",b:"Wrap the feature in a feeling it has no business carrying.",spark:"A death screen that's genuinely beautiful and peaceful."},
+  {c:"collide",n:"Solve it like a board game",b:"Use analog, tabletop logic instead of a digital system.",spark:"Limited inventory becomes a literal grid you Tetris your loot into."},
+  {c:"collide",n:"Cross it with a real hobby",b:"Filter the feature through cooking, gardening, music, or repair.",spark:"Spell-casting as actual rhythm-game drumming."},
+  {c:"collide",n:"Mash two of your own features",b:"Force two ingredients from this deck to share a single system.",spark:"Your idle animation IS the save indicator."},
+  {c:"collide",n:"Childlike vs. sinister",b:"Render a dark mechanic with a nursery aesthetic, or the reverse.",spark:"A crayon-drawn map of a genuinely frightening house."},
+  {c:"cost",n:"Make it cost something real",b:"Attach a price the player actually feels every time they use it.",spark:"The honk button works — but every honk tells the enemy exactly where you are."},
+  {c:"cost",n:"Trade-off, never a free win",b:"Each use gives something and takes something away.",spark:"Slow-mo that drains the very same meter your attacks need."},
+  {c:"cost",n:"Let the player sacrifice it",b:"Allow the feature to be spent permanently for a bigger goal.",spark:"Burn your only map to light a single dark room."},
+  {c:"cost",n:"Risk scales with reward",b:"The juicier the payoff, the bigger the danger that comes with it.",spark:"Bigger combos make you more visible — and more fragile."},
+  {c:"cost",n:"It can backfire",b:"Build in a real chance the feature turns on the player.",spark:"A pickup magnet that occasionally yanks a live grenade into your lap."},
+  {c:"cost",n:"Permanent consequence",b:"One use marks the whole run, for good or ill.",spark:"A revive that costs a scar you carry for the rest of the game."},
+  {c:"echo",n:"Plant early, pay off late",b:"Introduce the feature quietly, then cash it in hours later.",spark:"A 'useless' button from hour one that saves your life in the finale."},
+  {c:"echo",n:"It mutates with use",b:"Each use changes the feature a little — stranger, floatier, louder.",spark:"A jump that grows weirder and more buoyant every time you press it in one room."},
+  {c:"echo",n:"Let the player discover it",b:"Never explain it. Let them find it and feel clever for it.",spark:"No prompt ever admits the fake walls exist."},
+  {c:"echo",n:"Call back the last run",b:"The feature references something from a previous attempt or session.",spark:"A death message that quotes exactly how you died last time."},
+  {c:"echo",n:"Reveal it in tenths",b:"Show a sliver now and unfold the rest across hours of play.",spark:"A map that only admits it has a second half once you've finished the first."},
+  {c:"echo",n:"Recontextualize at the end",b:"The finale changes what the feature meant all along.",spark:"The 'tutorial' turns out to have been the villain studying you."},
+  {c:"voice",n:"Give it an opinion",b:"The feature reacts with attitude instead of staying neutral.",spark:"A save system that visibly judges how recklessly you play."},
+  {c:"voice",n:"Through one character's eyes",b:"Reframe the feature from a specific, biased point of view.",spark:"The HUD is what the anxious protagonist notices — and it flinches when they do."},
+  {c:"voice",n:"Break the fourth wall — once",b:"Let the feature acknowledge the player a single, well-timed time.",spark:"Near the end, the tutorial NPC quietly asks if you're getting tired."},
+  {c:"voice",n:"Let the villain narrate it",b:"Filter the feature's feedback through your antagonist.",spark:"The game-over screen is the villain, absolutely delighted."},
+  {c:"voice",n:"It has a relationship with you",b:"The feature warms up or cools off based on how you treat it.",spark:"A companion that comments less and less the more you ignore it."},
+  {c:"voice",n:"Give it manners — or none",b:"Make the feature politely apologetic, or pointedly, memorably rude.",spark:"An error message that is genuinely, weirdly hostile to you."},
+  {c:"lens",n:"Apply real bureaucracy",b:"Make the feature obey paperwork, forms, queues, and red tape.",spark:"Respawning requires filing a form first — and yes, it's funny."},
+  {c:"lens",n:"Obey a real physical law",b:"Force an actual rule of physics onto an abstract system.",spark:"Your inventory has real weight, and a full bag literally slows you down."},
+  {c:"lens",n:"Run it on a real clock",b:"Tie the feature to actual real-world time.",spark:"A shop that's only open at night — your night, wherever you are."},
+  {c:"lens",n:"Structure it on a human arc",b:"Shape the feature around a real emotional pattern, like the stages of grief.",spark:"A boss whose phases are denial, anger, bargaining, depression, acceptance."},
+  {c:"lens",n:"Borrow a rule from sport",b:"Apply an athletic rule — fouls, overtime, handicaps, substitutions.",spark:"A 'foul' system that benches you briefly for playing dirty."},
+  {c:"lens",n:"Make it alive & seasonal",b:"Let the feature grow, ripen, or change with weather and season.",spark:"A weapon that 'ripens' over time and must be used before it spoils."},
+];
+
+// ===================== STATE =====================
+let mode = "feature";
+let activeCat = "all";
+let goldOnly = false;
+let query = "";
+let comboFeature = null;
+const $ = s => document.querySelector(s);
+const deckFor = () => mode === "constraint" ? CONSTRAINTS : FEATURES;
+const catsFor = () => mode === "constraint" ? CCATS : FCATS;
+
+function pool(){
+  const isC = mode === "constraint";
+  const cats = isC ? CCATS : FCATS;
+  return deckFor().filter(d =>
+    (activeCat === "all" || d.c === activeCat) &&
+    (isC || !goldOnly || d.gold) &&
+    (!query || ((d.n + " " + d.b + " " + (d.ex||d.spark||"") + " " + cats[d.c].label).toLowerCase().includes(query)))
+  );
+}
+
+// ===================== CARD BUILDERS =====================
+function pips(v){ let h='<div class="pips">'; for(let i=1;i<=3;i++) h+=`<span class="pip ${i<=v?'on':''}"></span>`; return h+'</div>'; }
+
+function featureCardHTML(d, solo){
+  const col = FCATS[d.c].color;
+  return `<div class="card${solo?' solo':''}" style="--ac:${col}">
+    ${d.gold?'<div class="ribbon">★ GOLD</div>':''}
+    <div class="accent" style="background:${col}"></div>
+    <div class="body">
+      <div class="top"><span class="eyebrow" style="color:${col}">${FCATS[d.c].label}</span><span class="rdot" style="color:${col};background:${col}"></span></div>
+      <h3>${d.n}</h3><p class="blurb">${d.b}</p>
+      <div class="ex">seen in: <b>${d.ex}</b></div>
+    </div>
+    <div class="stats"><div class="stat effort"><div class="lab">Effort</div>${pips(d.ef)}</div><div class="stat impact"><div class="lab">Impact</div>${pips(d.im)}</div></div>
+  </div>`;
+}
+function constraintCardHTML(d, solo){
+  const col = CCATS[d.c].color;
+  return `<div class="card ck${solo?' solo':''}" style="--ac:${col}">
+    <div class="accent" style="background:${col}"></div>
+    <div class="body">
+      <div class="top"><span class="eyebrow" style="color:${col}">${CCATS[d.c].label}</span><span class="lens-tag">LENS</span></div>
+      <h3>${d.n}</h3><p class="blurb">${d.b}</p>
+      <div class="spark"><span class="spark-l">TRY THIS</span>${d.spark}</div>
+    </div>
+  </div>`;
+}
+function cardHTML(d, solo){ return mode === "constraint" ? constraintCardHTML(d,solo) : featureCardHTML(d,solo); }
+
+function comboHTML(f, c){
+  const fc = FCATS[f.c].color, cc = CCATS[c.c].color;
+  return `<div class="combo" style="--mf:${fc};--mc:${cc}">
+    <div class="combo-band">✦ DESIGN PROMPT ✦</div>
+    <div class="combo-pair">
+      <div class="mini feature"><span class="role">ADD</span><span class="eyebrow" style="color:${fc}">${FCATS[f.c].label}</span><h4>${f.n}</h4></div>
+      <div class="vs"><span>but</span></div>
+      <div class="mini constraint"><span class="role">TWIST</span><span class="eyebrow" style="color:${cc}">${CCATS[c.c].label}</span><h4>${c.n}</h4></div>
+    </div>
+    <div class="combo-brief">
+      <h4>${f.n} — but ${c.n.charAt(0).toLowerCase()+c.n.slice(1)}.</h4>
+      <p>${f.b}</p>
+      <p class="bend"><b>Now bend it:</b> ${c.b}</p>
+      <div class="spark" style="--ac:${cc}"><span class="spark-l">↳ FOR EXAMPLE</span>${c.spark}</div>
+    </div>
+  </div>`;
+}
+
+// ===================== DRAW =====================
+function reduceMotion(){ return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+function clearStage(){ $("#hand").classList.remove("show"); $("#hand").innerHTML=""; $("#stage").querySelectorAll(".card,.combo").forEach(c=>c.remove()); }
+
+function placeSolo(html, big){
+  const stage = $("#stage");
+  clearStage();
+  $("#placeholder").style.display = "none";
+  const tmp = document.createElement("div"); tmp.innerHTML = html;
+  const el = tmp.firstElementChild; el.classList.add("dealt"); stage.appendChild(el);
+  return el;
+}
+
+function drawOne(){
+  if(mode === "combo"){ drawCombo(false); return; }
+  const p = pool();
+  if(!p.length){ clearStage(); $("#placeholder").style.display="flex"; return; }
+  const pick = p[Math.floor(Math.random()*p.length)];
+  placeSolo(cardHTML(pick, true));
+  const col = catsFor()[pick.c].color;
+  burst($("#stage"), col, !!pick.gold);
+  if(pick.gold && !reduceMotion()){ shakeStage(); }
+}
+
+function drawHand(){
+  const p = pool();
+  const hand = $("#hand");
+  clearStage();
+  $("#placeholder").style.display = p.length ? "none" : "flex";
+  if(!p.length) return;
+  const shuffled = [...p].sort(()=>Math.random()-0.5);
+  const picks = []; const seen = new Set();
+  for(const d of shuffled){ if(picks.length>=3) break; if(!seen.has(d.c)){ picks.push(d); seen.add(d.c);} }
+  for(const d of shuffled){ if(picks.length>=3) break; if(!picks.includes(d)) picks.push(d); }
+  picks.forEach((d,i)=>{ const tmp=document.createElement("div"); tmp.innerHTML=cardHTML(d,false); const card=tmp.firstElementChild; card.classList.add("dealt"); card.style.animationDelay=(i*0.09)+"s"; hand.appendChild(card); });
+  hand.classList.add("show");
+  burst(hand, "var(--gold)", picks.some(d=>d.gold));
+}
+
+function drawCombo(keepFeature){
+  const f = (keepFeature && comboFeature) ? comboFeature : FEATURES[Math.floor(Math.random()*FEATURES.length)];
+  const c = CONSTRAINTS[Math.floor(Math.random()*CONSTRAINTS.length)];
+  comboFeature = f;
+  const stage = $("#stage"); clearStage(); $("#placeholder").style.display="none";
+  const tmp=document.createElement("div"); tmp.innerHTML=comboHTML(f,c); const el=tmp.firstElementChild; el.classList.add("dealt"); stage.appendChild(el);
+  burst(stage, "var(--gold)", true);
+  if(!reduceMotion()) shakeStage();
+}
+
+function shakeStage(){ const s=$("#stage"); s.classList.remove("shake"); void s.offsetWidth; s.classList.add("shake"); }
+
+function burst(anchor, color, big){
+  if(reduceMotion()) return;
+  const r = anchor.getBoundingClientRect();
+  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  const n = big ? 26 : 14;
+  const palette = big ? ["#FFE6A8","var(--gold)","#FF5D5D","#5EEAD4"] : [color];
+  for(let i=0;i<n;i++){
+    const s=document.createElement("div"); s.className="spark-p";
+    s.style.background = palette[i%palette.length];
+    s.style.left=cx+"px"; s.style.top=cy+"px"; document.body.appendChild(s);
+    const ang=Math.random()*Math.PI*2, dist=60+Math.random()*(big?170:110);
+    const dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist - 30;
+    s.animate([{transform:"translate(-50%,-50%) scale(1) rotate(0)",opacity:1},{transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0) rotate(${Math.random()*360}deg)`,opacity:0}],{duration:600+Math.random()*350,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=()=>s.remove();
+  }
+}
+
+// ===================== RENDER =====================
+function buildChips(){
+  const wrap = $("#chips"); const cats = catsFor();
+  const mk = (key,label,color) => {
+    const el = document.createElement("div");
+    el.className = "chip" + (activeCat===key?" active":"");
+    el.innerHTML = (color?`<span class="d" style="background:${color}"></span>`:"") + label;
+    if(activeCat===key && color){ el.style.background=color; el.style.borderColor=color; }
+    el.onclick = () => { activeCat = key; render(); };
+    return el;
+  };
+  wrap.innerHTML = "";
+  wrap.appendChild(mk("all","All",null));
+  Object.entries(cats).forEach(([k,v]) => wrap.appendChild(mk(k,v.label,v.color)));
+}
+
+function applyModeChrome(){
+  const isCombo = mode === "combo";
+  const isFeat = mode === "feature";
+  $("#filters").classList.toggle("hidden", isCombo);
+  $("#comboHelp").classList.toggle("show", isCombo);
+  $("#gridHead").classList.toggle("hidden", isCombo);
+  $("#grid").classList.toggle("hidden", isCombo);
+  $("#goldToggle").classList.toggle("hidden", !isFeat);
+  $("#search").placeholder = mode==="constraint" ? "Search constraints…" : "Search ingredients…";
+  $("#pantryTitle").textContent = mode==="constraint" ? "Every constraint" : "The whole pantry";
+  // draw + secondary labels
+  if(isCombo){
+    $("#drawBtn").textContent = "✦ DRAW COMBO";
+    $("#secondBtn").textContent = "↻ New twist (keep ingredient)";
+    $("#phBig").textContent = "PRESS DRAW";
+    $("#phSub").textContent = "Get an ingredient and a constraint as one design prompt.";
+    $("#hint").innerHTML = 'or hit <kbd>Space</kbd> · reroll the twist till it clicks';
+  } else {
+    $("#drawBtn").textContent = isFeat ? "◆ DRAW" : "▦ DRAW";
+    $("#secondBtn").textContent = "Deal a hand of 3 →";
+    $("#phBig").textContent = "PRESS DRAW";
+    $("#phSub").textContent = isFeat ? "Pull a random touch to sprinkle into whatever you're building." : "Pull a constraint — a rule that forces the feature to become yours.";
+    $("#hint").innerHTML = 'or hit <kbd>Space</kbd> to draw · filters below shape the pool';
+  }
+}
+
+function render(){
+  applyModeChrome();
+  if(mode === "combo"){ $("#showing").textContent=""; return; }
+  buildChips();
+  const p = pool();
+  const grid = $("#grid");
+  grid.innerHTML = p.length ? p.map(d=>cardHTML(d,false)).join("") : '<div class="empty-grid">Nothing matches that. Loosen a filter and try again.</div>';
+  grid.querySelectorAll(".card").forEach((el,i)=>{
+    el.onclick=()=>{ placeSolo(cardHTML(p[i],true)); burst($("#stage"), catsFor()[p[i].c].color, !!p[i].gold); window.scrollTo({top:0,behavior:"smooth"}); };
+  });
+  $("#showing").textContent = `${p.length} of ${deckFor().length} showing`;
+}
+
+function setMode(m){
+  if(m===mode) return;
+  mode = m; activeCat="all"; goldOnly=false; $("#goldToggle").classList.remove("on");
+  query=""; $("#search").value="";
+  $("#modeswitch").querySelectorAll("button").forEach(b=>b.classList.toggle("active", b.dataset.mode===m));
+  clearStage(); $("#placeholder").style.display="flex";
+  render();
+}
+
+// ===================== WIRING =====================
+$("#fCount").textContent = FEATURES.length;
+$("#cCount").textContent = CONSTRAINTS.length;
+$("#gCount").textContent = FEATURES.filter(d=>d.gold).length;
+$("#drawBtn").onclick = drawOne;
+$("#secondBtn").onclick = () => { if(mode==="combo") drawCombo(true); else drawHand(); };
+$("#modeswitch").querySelectorAll("button").forEach(b=> b.onclick=()=>setMode(b.dataset.mode));
+$("#search").addEventListener("input", e=>{ query=e.target.value.trim().toLowerCase(); render(); });
+$("#goldToggle").onclick = function(){ goldOnly=!goldOnly; this.classList.toggle("on",goldOnly); render(); };
+document.addEventListener("keydown", e=>{ if(e.code==="Space" && document.activeElement.tagName!=="INPUT"){ e.preventDefault(); drawOne(); } });
+
+// the promised secret
+const KC=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","KeyB","KeyA"];
+let kp=[];
+document.addEventListener("keydown", e=>{
+  kp.push(e.code); kp=kp.slice(-KC.length);
+  if(KC.every((k,i)=>kp[i]===k)){
+    const prevMode = mode; mode="feature";
+    const secret={c:"secret",n:"The Secret Ingredient",b:"You. The maker who sweats the details no one's owed. That's the sauce — the tax of caring, paid one tiny touch at a time. Now go ship something with a honk button.",ex:"this very deck",ef:3,im:3,gold:true};
+    placeSolo(featureCardHTML(secret,true)); burst($("#stage"),"var(--gold)",true); if(!reduceMotion()) shakeStage();
+    window.scrollTo({top:0,behavior:"smooth"}); kp=[]; mode=prevMode;
+  }
+});
+
+render();
+</script>
+</body>
+</html>
